@@ -18,3 +18,40 @@ def pregunta_01():
 
 
     """
+    import pandas as pd
+
+    with open('files/input/clusters_report.txt', 'r') as file:
+        lines = file.readlines()
+
+    data = []
+    cluster = None
+    for line in lines[4:]:
+        if line.strip():
+            parts = line.split()
+            if parts[0].isdigit():
+                if cluster:
+                    data.append(cluster)
+                cluster = {
+                    'cluster': int(parts[0]),
+                    'cantidad_de_palabras_clave': int(parts[1]),
+                    'porcentaje_de_palabras_clave': float(parts[2].replace(',', '.').replace('%', '')),
+                    'principales_palabras_clave': ' '.join(parts[3:]).lstrip('% ')
+                }
+            else:
+                cluster['principales_palabras_clave'] += ' ' + ' '.join(parts)
+
+    if cluster:
+        data.append(cluster)
+
+    df = pd.DataFrame(data)
+    df['principales_palabras_clave'] = (
+        df['principales_palabras_clave']
+        .str.replace(' ,', ',')
+        .str.replace(', ', ', ')
+        .str.replace('  ', ' ')
+        .str.strip('. ')
+    )
+
+    return df
+if __name__ == "__main__":
+  print(pregunta_01())
